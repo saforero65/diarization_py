@@ -6,7 +6,9 @@ from pyannote.audio import Pipeline
 pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization",
                                     use_auth_token="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")
 
-diarization = pipeline("mutefire.wav")
+print("Start diarization")
+
+diarization = pipeline("conversacion.wav")
 listDiarization = []    
 speakers = {}
 data = {
@@ -15,8 +17,10 @@ data = {
     "total_segmentos_por_speaker": {},
     "segmentos": []
 }
-
+print("End diarization")
 #se recorre cada track de la diarización utilizando el método itertracks y se asigna cada valor a las variables turn, _ y speaker. El yield_label=True indica que se desea acceder a la etiqueta del hablante en cada iteracion.
+
+print("Start writing json")
 for turn, _, speaker in diarization.itertracks(yield_label=True):
     
     line= {"start": turn.start, "stop": turn.end, "speaker": speaker}    
@@ -37,3 +41,5 @@ data["segmentos"] = listDiarization
 
 with open("mutefirev2.json", "w") as file:
     file.write(json.dumps(data, indent=4))
+    
+print("End writing json")    
