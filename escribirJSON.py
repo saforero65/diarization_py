@@ -1,4 +1,5 @@
 import json
+import time
 
 from pyannote.audio import Pipeline
 
@@ -6,40 +7,53 @@ from pyannote.audio import Pipeline
 pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization",
                                     use_auth_token="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")
 
-print("Start diarization")
-
-diarization = pipeline("conversacion.wav")
-listDiarization = []    
-speakers = {}
-data = {
-    "total_segmentos":0 ,
-    "total_speakers": 0,
-    "total_segmentos_por_speaker": {},
-    "segmentos": []
-}
-print("End diarization")
-#se recorre cada track de la diarización utilizando el método itertracks y se asigna cada valor a las variables turn, _ y speaker. El yield_label=True indica que se desea acceder a la etiqueta del hablante en cada iteracion.
-
-print("Start writing json")
-for turn, _, speaker in diarization.itertracks(yield_label=True):
+for i in range(8000, 32000, 1000):
+    # Comienza a medir el tiempo
     
-    line= {"start": turn.start, "stop": turn.end, "speaker": speaker}    
-    listDiarization.append(line)
-    if speaker not in speakers:
-        speakers[speaker] = 1
-    else:
-        speakers[speaker] += 1        
+    start_time = time.time()
+    print("Start time diarization"+str(i))
+    print("Start diarization"+str(i))
 
-#añadir cuantos speakers reconocio y el total de segmentos por speaker
+    diarization = pipeline("../converter/output/tolive_"+str(i)+".wav")
+    listDiarization = []    
+    speakers = {}
+    data = {
+        "total_segmentos":0 ,
+        "total_speakers": 0,
+        "total_segmentos_por_speaker": {},
+        "segmentos": []
+    }
+    print("End diarization"+str(i))
+    #se recorre cada track de la diarización utilizando el método itertracks y se asigna cada valor a las variables turn, _ y speaker. El yield_label=True indica que se desea acceder a la etiqueta del hablante en cada iteracion.
+
+    print("Start writing json"+str(i))
+    for turn, _, speaker in diarization.itertracks(yield_label=True):
+
+        line= {"start": turn.start, "stop": turn.end, "speaker": speaker}    
+        listDiarization.append(line)
+        if speaker not in speakers:
+            speakers[speaker] = 1
+        else:
+            speakers[speaker] += 1        
+
+    #añadir cuantos speakers reconocio y el total de segmentos por speaker
 
 
-data["total_segmentos"] = len(listDiarization)
-data["total_speakers"] = len(speakers)
-data["total_segmentos_por_speaker"] = speakers
-data["segmentos"] = listDiarization
+    data["total_segmentos"] = len(listDiarization)
+    data["total_speakers"] = len(speakers)
+    data["total_segmentos_por_speaker"] = speakers
+    data["segmentos"] = listDiarization
 
 
-with open("mutefirev2.json", "w") as file:
-    file.write(json.dumps(data, indent=4))
-    
-print("End writing json")    
+    with open("outputToLive/tolive_"+str(i)+".json", "w") as file:
+        file.write(json.dumps(data, indent=4))
+        
+    end_time = time.time()
+    print("End time diarization"+str(i))
+    duration = end_time - start_time
+    #Guardar registro del tiempo de ejecucion en un archivo de texto
+    print("Duración del proceso: {:.2f} segundos".format(duration))
+    with open("registros/tiempo_diarizacion"+ str(i)+".txt", "w") as file:
+        file.write("Duración del proceso: {:.2f} segundos".format(duration))
+        
+    print("End writing json" +str(i))    
