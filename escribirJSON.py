@@ -7,14 +7,13 @@ from pyannote.audio import Pipeline
 pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization",
                                     use_auth_token="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")
 
-for i in range(8000, 32000, 1000):
-    # Comienza a medir el tiempo
-    
+for i in range(44000, 45000, 1000):
+    # Comienza a medir el tiempo    
     start_time = time.time()
     print("Start time diarization"+str(i))
     print("Start diarization"+str(i))
 
-    diarization = pipeline("../converter/output/tolive_"+str(i)+".wav")
+    diarization = pipeline("../converter/output/mutefire_"+str(i)+".wav")
     listDiarization = []    
     speakers = {}
     data = {
@@ -45,7 +44,7 @@ for i in range(8000, 32000, 1000):
     data["segmentos"] = listDiarization
 
 
-    with open("outputToLive/tolive_"+str(i)+".json", "w") as file:
+    with open("outputMutefire/mutefire_"+str(i)+".json", "w") as file:
         file.write(json.dumps(data, indent=4))
         
     end_time = time.time()
@@ -53,7 +52,7 @@ for i in range(8000, 32000, 1000):
     duration = end_time - start_time
     #Guardar registro del tiempo de ejecucion en un archivo de texto
     print("Duración del proceso: {:.2f} segundos".format(duration))
-    with open("registros/tiempo_diarizacion"+ str(i)+".txt", "w") as file:
+    with open("registros_muteFire/tiempo_diarizacion"+ str(i)+".txt", "w") as file:
         file.write("Duración del proceso: {:.2f} segundos".format(duration))
         
     print("End writing json" +str(i))    
